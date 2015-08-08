@@ -194,9 +194,9 @@ var (
 	noBrowser         bool
 	noConsole         bool
 	generateDir       string
-	logFile           string
 	auditEnabled      bool
 	verbose           bool
+	logFile           = "<default>" // Default is syncthing.log in the config dir
 	noRestart         = os.Getenv("STNORESTART") != ""
 	noUpgrade         = os.Getenv("STNOUPGRADE") != ""
 	guiAddress        = os.Getenv("STGUIADDRESS") // legacy
@@ -213,10 +213,6 @@ func main() {
 	if runtime.GOOS == "windows" {
 		// We also add an option to hide the console window
 		flag.BoolVar(&noConsole, "no-console", false, "Hide console window")
-	} else {
-		// On Windows, we use a log file by default.
-		// Setting the logfile to "-" disables this behavior.
-		logFile = "-"
 	}
 
 	flag.StringVar(&generateDir, "generate", "", "Generate key and config in specified dir, then exit")
@@ -224,7 +220,7 @@ func main() {
 	flag.StringVar(&guiAuthentication, "gui-authentication", guiAuthentication, "Override GUI authentication; username:password")
 	flag.StringVar(&guiAPIKey, "gui-apikey", guiAPIKey, "Override GUI API key")
 	flag.StringVar(&confDir, "home", "", "Set configuration directory")
-	flag.StringVar(&logFile, "logfile", logFile, "Log file name (use \"-\" for stdout)")
+	flag.StringVar(&logFile, "logfile", logFile, "Log file name (\"<default>\" for standard location; \"-\" for stdout)")
 	flag.IntVar(&logFlags, "logflags", logFlags, "Select information in log line prefix")
 	flag.BoolVar(&noBrowser, "no-browser", false, "Do not start browser")
 	flag.BoolVar(&noRestart, "no-restart", noRestart, "Do not restart; just exit")
@@ -256,13 +252,9 @@ func main() {
 		guiAssets = locations[locGUIAssets]
 	}
 
-	if logFile == "" {
+	if logFile == "<default>" {
 		// Use the default log file location
 		logFile = locations[locLogFile]
-	}
-	if logFile == "-" {
-		// Don't use a logFile
-		logFile = ""
 	}
 
 	if showVersion {
